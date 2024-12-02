@@ -1,8 +1,8 @@
 ﻿<Window x:Class="AkavacheExplorer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:xaml="clr-namespace:ReactiveUI.Xaml;assembly=ReactiveUI.Xaml"
+        xmlns:reactiveUi="http://reactiveui.net"
         x:Name="theWindow"
         Title="Akavache Explorer" Height="350" Width="525">
-    <xaml:RoutedViewHost Router="{Binding Path=ViewModel.Router, ElementName=theWindow}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch" />
+    <reactiveUi:RoutedViewHost Router="{Binding Path=ViewModel.Router, ElementName=theWindow}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch" />
 </Window>

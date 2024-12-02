@@ -5,6 +5,9 @@ using System.Reactive.Linq;
 using ReactiveUI;
 using System.Reactive;
 using Akavache;
+using Akavache.Sqlite3;
+
+using Splat;
 
 namespace Akavache.Models
 {
@@ -82,19 +85,19 @@ namespace Akavache.Models
         public DateTimeOffset Now { get { return DateTimeOffset.MinValue; } }
     }
 
-    public class ReadonlyBlobCache : PersistentBlobCache
-    {
-        public ReadonlyBlobCache(string cacheDirectory, IScheduler scheduler = null)
-            : base(cacheDirectory, new ReadonlyFileSystemProvider(), new BeginningOfTimeScheduler(scheduler ?? RxApp.TaskpoolScheduler))
-        {
-        }
-    }
-
-    public class ReadonlyEncryptedBlobCache : EncryptedBlobCache
-    {
-        public ReadonlyEncryptedBlobCache(string cacheDirectory, IScheduler scheduler = null)
-            : base(cacheDirectory, new ReadonlyFileSystemProvider(), new BeginningOfTimeScheduler(scheduler ?? RxApp.TaskpoolScheduler))
-        {
-        }
-    }
+    // public class ReadonlyBlobCache : SQLitePersistentBlobCache
+    // {
+    //     public ReadonlyBlobCache(string cacheDirectory, IScheduler scheduler = null)
+    //         : base(cacheDirectory, new ReadonlyFileSystemProvider(), new BeginningOfTimeScheduler(scheduler ?? RxApp.TaskpoolScheduler))
+    //     {
+    //     }
+    // }
+    //
+    // public class ReadonlyEncryptedBlobCache : SQLiteEncryptedBlobCache
+    // {
+    //     public ReadonlyEncryptedBlobCache(string cacheDirectory, IScheduler scheduler = null)
+    //         : base(cacheDirectory, new ReadonlyFileSystemProvider(), new BeginningOfTimeScheduler(scheduler ?? RxApp.TaskpoolScheduler))
+    //     {
+    //     }
+    // }
 }

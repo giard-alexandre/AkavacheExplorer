@@ -2,17 +2,18 @@
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
+<!--    For Once migrated off WPF-->
+<!--    <OutputType>Exe</OutputType>-->
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">.\</SolutionDir>
     <RestorePackages>false</RestorePackages>
-    <ExpressionBlendVersion>4.0.30816.0</ExpressionBlendVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+<!--    <ExpressionBlendVersion>4.0.30816.0</ExpressionBlendVersion>-->
     <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+<!--    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>-->
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="System.Net" />
-  </ItemGroup>
+<!--  <ItemGroup>-->
+<!--    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />-->
+<!--    <Reference Include="System.Net" />-->
+<!--  </ItemGroup>-->
   <ItemGroup>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
@@ -20,24 +21,17 @@
     <Folder Include="SampleData\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="akavache" Version="3.0.2" />
-    <PackageReference Include="akavache.portable" Version="3.0.2" />
-    <PackageReference Include="akavache.sqlite3" Version="3.0.2" />
-    <PackageReference Include="Ix_Experimental-Main" Version="1.1.10823" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="5.0.6" />
-    <PackageReference Include="Ninject" Version="3.0.1.10" />
-    <PackageReference Include="reactiveui" Version="5.1.2" />
-    <PackageReference Include="reactiveui-core" Version="5.1.2" />
-    <PackageReference Include="reactiveui-platforms" Version="5.1.2" />
-    <PackageReference Include="Rx-Core" Version="2.1.30214.0" />
-    <PackageReference Include="Rx-Interfaces" Version="2.1.30214.0" />
-    <PackageReference Include="Rx-Linq" Version="2.1.30214.0" />
-    <PackageReference Include="Rx-Main" Version="2.1.30214.0" />
-    <PackageReference Include="Rx-PlatformServices" Version="2.1.30214.0" />
-    <PackageReference Include="Rx-Xaml" Version="2.1.30214.0" />
-    <PackageReference Include="Splat" Version="0.3.0" />
+    <PackageReference Include="akavache" Version="10.1.6" />
+    <PackageReference Include="akavache.sqlite3" Version="10.1.6" />
+<!--    <PackageReference Include="Ix_Experimental-Main" Version="1.1.10823" />-->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="ReactiveUI" Version="20.1.63" />
+    <PackageReference Include="ReactiveUI.WPF" Version="20.1.63" />
+<!--    <PackageReference Include="Ninject" Version="3.0.1.10" />-->
+    <PackageReference Include="Splat" Version="15.2.22" />
+    <PackageReference Include="Splat.Drawing" Version="15.2.22" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+<!--    Used for Dialogs, could replace this-->
     <PackageReference Include="WindowsAPICodePack-Core" Version="1.1" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1" />
   </ItemGroup>

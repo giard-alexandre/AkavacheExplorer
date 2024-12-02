@@ -15,7 +15,7 @@ using Newtonsoft.Json.Bson;
 
 namespace AkavacheExplorer.ViewModels
 {
-    public interface ICacheValueViewModel : IReactiveNotifyPropertyChanged
+    public interface ICacheValueViewModel : IReactiveNotifyPropertyChanged<IReactiveObject>
     {
         byte[] Model { get; set; }
     }

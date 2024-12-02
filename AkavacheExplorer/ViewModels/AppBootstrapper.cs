@@ -2,9 +2,11 @@ using Akavache;
 using AkavacheExplorer.Views;
 using ReactiveUI;
 
+using Splat;
+
 namespace AkavacheExplorer.ViewModels
 {
-    public interface IAppState : IReactiveNotifyPropertyChanged
+    public interface IAppState : IReactiveNotifyPropertyChanged<IReactiveObject>
     {
         IBlobCache CurrentCache { get; set; }
         string CachePath { get; set; }
@@ -12,7 +14,7 @@ namespace AkavacheExplorer.ViewModels
 
     public class AppBootstrapper : ReactiveObject, IScreen, IAppState
     {
-        public IRoutingState Router { get; protected set; }
+        public RoutingState Router { get; protected set; }
 
         IBlobCache _CurrentCache;
         public IBlobCache CurrentCache {
@@ -26,20 +28,20 @@ namespace AkavacheExplorer.ViewModels
             set { this.RaiseAndSetIfChanged(ref _CachePath, value); }
         }
 
-        public AppBootstrapper(IDependencyResolver kernel = null, IRoutingState router = null)
+        public AppBootstrapper()
         {
-            RxApp.DependencyResolver = kernel ?? createStandardKernel();
-            Router = router ?? new RoutingState();
+            createStandardKernel();
+            Router = new RoutingState();
 
             // Our first screen is "Open cache"
             Router.Navigate.Execute(new OpenCacheViewModel(this, this));
         }
 
-        IDependencyResolver createStandardKernel()
+        IMutableDependencyResolver createStandardKernel()
         {
-            var r = RxApp.MutableResolver;
+            var r = Locator.CurrentMutable;
 
-            r.RegisterConstant(this, typeof(IScreen));
+            r.RegisterConstant<IScreen>(this);
 
             r.Register(() => new OpenCacheView(), typeof(IViewFor<OpenCacheViewModel>));
             r.Register(() => new CacheView(), typeof(IViewFor<CacheViewModel>));
