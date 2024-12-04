@@ -1,5 +1,7 @@
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 using DynamicData;
@@ -10,7 +12,8 @@ namespace AkavacheExplorer.ViewModels
 {
     public interface ICacheViewModel : IRoutableViewModel
     {
-        IObservableList<string> Keys { get; }
+        ReadOnlyObservableCollection<string> Keys { get; }
+        ReadOnlyObservableCollection<string> FilteredKeys { get; }
         string SelectedKey { get; set; }
         ICacheValueViewModel SelectedValue { get; }
         string SelectedViewer { get; set; }
@@ -18,9 +21,12 @@ namespace AkavacheExplorer.ViewModels
 
     public class CacheViewModel : ReactiveObject, ICacheViewModel
     {
-        public SourceList<string> _keys = new();
-        public IObservableList<string> Keys => _keys;
-        public IObservableList<string> FilteredKeys { get; protected set; }
+        private readonly CompositeDisposable _d = new();
+        public SourceList<string> _keySource = new();
+        private readonly ReadOnlyObservableCollection<string> _keys = ReadOnlyObservableCollection<string>.Empty;
+        public ReadOnlyObservableCollection<string> Keys => _keys;
+        private readonly ReadOnlyObservableCollection<string> _filteredKeys = ReadOnlyObservableCollection<string>.Empty;
+        public ReadOnlyObservableCollection<string> FilteredKeys => _filteredKeys;
 
         string _SelectedKey;
         public string SelectedKey {
@@ -68,20 +74,24 @@ namespace AkavacheExplorer.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(newKeys => {
                     // TODO: use ToChangeSet from DynamicData?
-                    _keys.Clear();
-                    _keys.AddRange(newKeys);
+                    _keySource.Clear();
+                    _keySource.AddRange(newKeys);
                 });
 
+            _keySource.Connect().Bind(out _keys).Subscribe().DisposeWith(_d);
+
             IObservable<Func<string,bool>> observablePredicate = this.WhenAnyValue(x => x.FilterText, selector: BuildFilter);
-            FilteredKeys = _keys.Connect()
+            _keySource.Connect()
                 .Filter(observablePredicate)
-                .AsObservableList();
+                .Bind(out _filteredKeys)
+                .Subscribe()
+                .DisposeWith(_d);
 
             SelectedViewer = "Text";
 
-            this.WhenAny(x => x.SelectedKey, x => x.SelectedViewer, (k, v) => k.Value)
-                .Where(x => x != null && SelectedViewer != null)
-                .SelectMany(x => appState.CurrentCache.Get(x).Catch(Observable.Return(default(byte[]))))
+            this.WhenAnyValue(x => x.SelectedKey, x => x.SelectedViewer, (k, v) => (k, v))
+                .Where(kv => kv is { k: not null, v: not null })
+                .SelectMany(kv => appState.CurrentCache.Get(kv.k).Catch(Observable.Return(default(byte[]))))
                 .Select(x => createValueViewModel(x, SelectedViewer))
                 .LoggedCatch(this, Observable.Return<ICacheValueViewModel>(null))
                 .ToProperty(this, x => x.SelectedValue, out _SelectedValue);

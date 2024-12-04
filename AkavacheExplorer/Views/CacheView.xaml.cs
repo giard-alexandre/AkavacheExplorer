@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,14 +19,19 @@ namespace AkavacheExplorer.Views
         {
             InitializeComponent();
 
-            RxApp.MainThreadScheduler.Schedule(() => new[] { textRadio, jsonRadio, imageRadio }
-                .Select(y => y.WhenAny(x => x.IsChecked, x => x).Where(x => x.Value == true).Select(x => x.Sender.Tag))
-                .Merge()
-                .Subscribe(x => ViewModel.SelectedViewer = (string)x));
+            this.WhenActivated((CompositeDisposable d) => {
+                RxApp.MainThreadScheduler.Schedule(() => new[] { textRadio, jsonRadio, imageRadio }
+                    .Select(y =>
+                        y.WhenAny(x => x.IsChecked, x => x).Where(x => x.Value == true).Select(x => x.Sender.Tag))
+                    .Merge()
+                    .Subscribe(x => ViewModel.SelectedViewer = (string)x));
+            });
+
+            
 
             this.OneWayBind(ViewModel, x => x.FilteredKeys, x => x.Keys.ItemsSource);
             this.Bind(ViewModel, x => x.SelectedKey, x => x.Keys.SelectedItem);
-            this.OneWayBind(ViewModel, x => x.SelectedValue, x => x.SelectedValue.ViewModel);
+            this.OneWayBind(ViewModel, x => x.SelectedValue, x => x.SelectedValue.ViewModel, RxApp.MainThreadScheduler);
             this.Bind(ViewModel, x => x.FilterText, x => x.filter.Text);
         }
 
