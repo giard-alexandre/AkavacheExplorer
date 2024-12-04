@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Akavache;
 using Akavache.Models;
@@ -84,20 +86,20 @@ namespace AkavacheExplorer.ViewModels
 
         IObservable<IBlobCache> openAkavacheCache(string path, bool openAsEncrypted, bool openAsSqlite3)
         {
-            var ret = default(IObservable<IBlobCache>);
-
-            if (openAsSqlite3) {
-                ret = Observable.Start(() => openAsEncrypted ?
-                    (IBlobCache)new SQLiteEncryptedBlobCache(path) : (IBlobCache)new SQLitePersistentBlobCache(path), RxApp.TaskpoolScheduler);
-            } else {
-                // TODO: this used to use `ReadonlyBlobCache` and `ReadonlyEncryptedBlobCache`
-                ret = Observable.Start(() => openAsEncrypted ?
-                    (IBlobCache)new SQLiteEncryptedBlobCache(path) : (IBlobCache)new SQLitePersistentBlobCache(path), RxApp.TaskpoolScheduler);
-            }
+            var ret = Observable.Create<IBlobCache>(observer => {
+                if (openAsSqlite3) {
+                    observer.OnNext(openAsEncrypted ?
+                        new SQLiteEncryptedBlobCache(path) : new SQLitePersistentBlobCache(path));
+                } else {
+                    observer.OnNext(openAsEncrypted ?
+                        new ReadonlyEncryptedBlobCache(CachePath) : new ReadonlyBlobCache(CachePath));
+                }
                 
-            return ret.SelectMany(x => x.GetAllKeys().Any() ?
-                Observable.Return(x) : 
-                Observable.Throw<IBlobCache>(new Exception("Cache has no items")));
+                observer.OnCompleted();
+                return Disposable.Empty;
+            });
+
+            return ret;
         }
 
         public string browseForFolder(string selectedPath, string title)
