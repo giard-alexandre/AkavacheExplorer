@@ -1,14 +1,16 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
+
+using DynamicData;
+
 using ReactiveUI;
 
 namespace AkavacheExplorer.ViewModels
 {
     public interface ICacheViewModel : IRoutableViewModel
     {
-        ReactiveList<string> Keys { get; }
+        IObservableList<string> Keys { get; }
         string SelectedKey { get; set; }
         ICacheValueViewModel SelectedValue { get; }
         string SelectedViewer { get; set; }
@@ -16,8 +18,9 @@ namespace AkavacheExplorer.ViewModels
 
     public class CacheViewModel : ReactiveObject, ICacheViewModel
     {
-        public ReactiveList<string> Keys { get; protected set; }
-        public IReactiveDerivedList<string> FilteredKeys { get; protected set; }
+        public SourceList<string> _keys = new();
+        public IObservableList<string> Keys => _keys;
+        public IObservableList<string> FilteredKeys { get; protected set; }
 
         string _SelectedKey;
         public string SelectedKey {
@@ -60,25 +63,25 @@ namespace AkavacheExplorer.ViewModels
                 .Select(x => (new DirectoryInfo(x)).Name)
                 .ToProperty(this, x => x.UrlPathSegment, out _UrlPathSegment);
 
-            Keys = new ReactiveList<string>();
             appState.WhenAny(x => x.CurrentCache, x => x.Value)
-                .SelectMany(x => Observable.Start(() => x.GetAllKeys(), RxApp.TaskpoolScheduler))
+                .SelectMany(x => x.GetAllKeys())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(newKeys => {
-                    Keys.Clear();
-                    newKeys.ForEach(x => Keys.Add(x));
+                    // TODO: use ToChangeSet from DynamicData?
+                    _keys.Clear();
+                    _keys.AddRange(newKeys);
                 });
 
-            FilteredKeys = Keys.CreateDerivedCollection(
-                key => key,
-                key => FilterText == null || key.IndexOf(FilterText, StringComparison.OrdinalIgnoreCase) > -1,
-                signalReset: this.WhenAny(x => x.FilterText, x => x.Value));
+            IObservable<Func<string,bool>> observablePredicate = this.WhenAnyValue(x => x.FilterText, selector: BuildFilter);
+            FilteredKeys = _keys.Connect()
+                .Filter(observablePredicate)
+                .AsObservableList();
 
             SelectedViewer = "Text";
 
             this.WhenAny(x => x.SelectedKey, x => x.SelectedViewer, (k, v) => k.Value)
                 .Where(x => x != null && SelectedViewer != null)
-                .SelectMany(x => appState.CurrentCache.GetAsync(x).Catch(Observable.Return(default(byte[]))))
+                .SelectMany(x => appState.CurrentCache.Get(x).Catch(Observable.Return(default(byte[]))))
                 .Select(x => createValueViewModel(x, SelectedViewer))
                 .LoggedCatch(this, Observable.Return<ICacheValueViewModel>(null))
                 .ToProperty(this, x => x.SelectedValue, out _SelectedValue);
@@ -100,6 +103,12 @@ namespace AkavacheExplorer.ViewModels
             default:
                 throw new NotImplementedException();
             }
+        }
+        
+        private Func<string, bool> BuildFilter(string searchText)
+        {
+            if (string.IsNullOrEmpty(searchText)) return _ => true;
+            return s => string.Equals(s, searchText, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

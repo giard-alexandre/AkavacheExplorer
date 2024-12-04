@@ -23,6 +23,7 @@
   <ItemGroup>
     <PackageReference Include="akavache" Version="10.1.6" />
     <PackageReference Include="akavache.sqlite3" Version="10.1.6" />
+    <PackageReference Include="DynamicData" Version="9.0.4" />
 <!--    <PackageReference Include="Ix_Experimental-Main" Version="1.1.10823" />-->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="ReactiveUI" Version="20.1.63" />

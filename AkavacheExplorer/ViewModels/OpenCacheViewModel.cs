@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Akavache;
@@ -10,6 +8,8 @@ using Akavache.Models;
 using Akavache.Sqlite3;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ReactiveUI;
+
+using Splat;
 
 namespace AkavacheExplorer.ViewModels
 {
@@ -68,7 +68,9 @@ namespace AkavacheExplorer.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x => {
                     if (x == null) {
-                        UserError.Throw("Couldn't open this cache");
+                        // TODO: Throw an error or something?
+                        // UserError.Throw("Couldn't open this cache");
+                        this.Log().Error($"Unable to open cache from {CachePath}");
                         return;
                     }
 
